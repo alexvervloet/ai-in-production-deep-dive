@@ -14,7 +14,7 @@ ops stack. Every example, the eval gate, and the capstone server run with zero
 keys and zero cost. Flip one env var and the exact same pipeline runs against a
 real OpenAI or Claude model.
 
-This is the eighth and final repo in a series. The first seven teach the pieces —
+This is the eighth and final core repo in the series. The first seven teach the pieces —
 [the API](https://github.com/Ailuue/openai-api-deep-dive),
 [Claude](https://github.com/Ailuue/claude-api-deep-dive),
 [prompt engineering](https://github.com/Ailuue/prompt-engineering-deep-dive),
@@ -284,6 +284,40 @@ changes.
 
 ---
 
+## Going further — three more production concerns
+
+The capstone covers the core seven layers. These three are the next ones you hit at
+scale — and, like everything here, they run **offline on the mock**.
+
+### Semantic caching
+The exact-match cache (§6) misses every paraphrase. A **semantic cache** serves a
+cached answer when a new query is close enough *in meaning* (embedding similarity) —
+a much higher hit rate on real traffic, at the cost of a threshold you must tune so
+you never serve a similar-but-wrong answer.
+```bash
+python examples/09_semantic_caching.py
+```
+
+### Model failover & cost routing
+A model is a dependency: have a **backup** for when the primary is down (failover to
+a cheaper model or a canned answer beats a 500), and **route** easy questions to a
+cheap model while reserving the expensive one for the hard ones — same quality where
+it matters, a fraction of the bill.
+```bash
+python examples/10_model_fallback.py
+```
+
+### Rate limiting & the feedback flywheel
+A per-tenant **token bucket** stops one client from starving a shared, costly backend
+(fairness, cost control, multi-tenancy). And capturing 👍/👎 on answers turns
+production into your best eval set — the thumbs-down cases are exactly what to add as
+regression tests (the evals dive) and fine-tuning data.
+```bash
+python examples/11_rate_limiting_and_feedback.py
+```
+
+---
+
 ## Where to go next
 
 You've operated one app end to end. The road to a real deployment is mostly about
@@ -347,6 +381,9 @@ examples/
   06_prompt_versioning.py   ← same question, v1 vs v2 behavior
   07_eval_gate.py           ← score both versions; only the passing one ships
   08_app_end_to_end.py      ← all seven layers on one request, with traces
+  09_semantic_caching.py    ← cache by meaning (embedding similarity), not exact text
+  10_model_fallback.py      ← failover to a backup model + cost routing by difficulty
+  11_rate_limiting_and_feedback.py ← per-tenant token bucket + the 👍/👎 feedback flywheel
 ```
 
 ---
@@ -372,7 +409,7 @@ at the top, and run it directly.
 
 ## The series
 
-This is one of eight standalone, hands-on deep dives into building with LLM APIs.
+This is one of thirteen standalone, hands-on deep dives into building with LLM APIs — eight core, plus five bonus dives.
 Each one stands on its own — its own setup, examples, and capstone — and they all
 share the same house style: provider-agnostic, built from scratch (no
 frameworks), offline-first examples, and a real capstone. Do them in any order;
@@ -386,5 +423,13 @@ this sequence builds naturally:
 6. [Agents](https://github.com/Ailuue/agents-deep-dive) — give a model tools and a loop so it can act
 7. [Prompt Injection & Guardrails](https://github.com/Ailuue/prompt-injection-deep-dive) — attack and defend all of the above
 8. [Production](https://github.com/Ailuue/ai-in-production-deep-dive) — operate one app end to end: observability, cost, reliability, caching, guardrails, prompt versioning, eval gates
+
+**Bonus dives** — standalone, slotting in where they're most useful:
+
+- [Context Engineering](https://github.com/Ailuue/context-engineering-deep-dive) — manage what's in the window: memory, compaction, assembly
+- [Multimodal](https://github.com/Ailuue/multimodal-deep-dive) — images & audio, not just text
+- [Fine-tuning](https://github.com/Ailuue/fine-tuning-deep-dive) — teach a model new behavior by example
+- [MCP](https://github.com/Ailuue/mcp-deep-dive) — serve tools, data & prompts to any LLM over a standard protocol
+- [Local Models](https://github.com/Ailuue/local-models-deep-dive) — run open-weight models on your own machine
 
 **You are here: #8 — Production.**
