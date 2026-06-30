@@ -119,7 +119,7 @@ def run_server(app: App, port: int) -> None:
                 "prompt_version": ans.prompt_version,
             })
 
-        def log_message(self, *args):  # silence default access logs; we have traces
+        def log_message(self, format: str, *args: object) -> None:  # silence default access logs; we have traces
             pass
 
     server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
