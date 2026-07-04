@@ -110,8 +110,8 @@ def ensure_ready() -> None:
     missing = [k for k in required_keys() if not os.getenv(k)]
     if missing:
         sys.exit(
-            f"PROVIDER={p} needs {', '.join(missing)} in .env. "
-            f"See .env.example, or run `python check_setup.py`. "
+            f"PROVIDER={p} needs {', '.join(missing)} in the environment. "
+            f"Provide them via secrun (see SECRETS.md), or run `secrun python check_setup.py`. "
             f"(Tip: PROVIDER=mock needs no key and runs everything offline.)"
         )
 
