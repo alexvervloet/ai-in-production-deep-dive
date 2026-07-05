@@ -57,8 +57,10 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 # 2. Install dependencies (just python-dotenv for the default offline stack)
 pip install -r requirements.txt
 
-# 3. Copy the env file — you do NOT need to add a key
+# 3. Copy the env file — the default runs keyless (no API key needed)
 cp .env.example .env
+#    (Real provider instead of the mock? Its key goes in your OS keychain,
+#     not .env — see ../SECRETS.md — then run scripts as `secrun python ...`.)
 
 # 4. Confirm everything is wired up (makes no API call, costs nothing)
 python check_setup.py
@@ -395,7 +397,7 @@ Run `python check_setup.py` first — it catches most problems. Then, by symptom
 | What you see | What it means / the fix |
 |--------------|-------------------------|
 | `ModuleNotFoundError: dotenv` | Dependencies aren't installed or the venv isn't active. `source .venv/bin/activate` then `pip install -r requirements.txt`. |
-| `PROVIDER=... needs ... in .env` | You switched to a real provider without a key. Set the key, or go back to `PROVIDER=mock` to run offline. |
+| `PROVIDER=... needs ... in the environment` | You switched to a real provider without a key. Load it from your keychain with `secrun` (see [SECRETS.md](../SECRETS.md)), or go back to `PROVIDER=mock`. |
 | The eval gate exits non-zero | That's the gate working — a version failed. `python examples/07_eval_gate.py` shows which case and why. |
 | `BudgetExceeded` | The spend ceiling did its job. Raise it with `--budget` on the capstone, or `Budget(limit_usd=...)` in code. |
 | Structured logs clutter my output | Logs go to **stderr**, answers to **stdout** — `python ... 2>/dev/null` hides logs. Or raise the level with `observability.set_level("error")`. |
