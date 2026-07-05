@@ -62,7 +62,7 @@ def _get(env, name):
 
 
 # Always needed. Provider SDKs are checked only for the real (non-mock) stacks.
-ALWAYS = [("dotenv", "python-dotenv", "loads PROVIDER and keys from .env")]
+ALWAYS = [("dotenv", "python-dotenv", "loads PROVIDER/config from .env")]
 PROVIDER_DEPS = {
     "mock": [],  # the offline default: standard library only
     "openai": [("openai", "openai", "OpenAI chat")],
@@ -129,8 +129,8 @@ def check_keys(env, provider):
     for name, prefix, placeholder in keys:
         value = _get(env, name)
         if not value or value == placeholder:
-            fail(f"{name} is not set (still the placeholder).")
-            print("    Open .env and paste your real key — or set PROVIDER=mock to run offline.")
+            fail(f"{name} is not set.")
+            print("    Store it in your keychain + run under `secrun` (see SECRETS.md) — or set PROVIDER=mock to run offline.")
             all_ok = False
         elif not value.startswith(prefix):
             warn(f"{name} is set but doesn't start with '{prefix}'. Double-check it.")
