@@ -90,4 +90,4 @@ Two bonus dives extend this chapter directly: Agent Harnesses (Chapter 9) applie
 
 ---
 
-*Lab manual: [README.md](README.md) · Exercises: [EXERCISES.md](EXERCISES.md) · Previous: [Prompt Injection & Guardrails](../prompt-injection-deep-dive/README.md) · Next (bonus dives): [Agent Harnesses](../agent-harness-deep-dive/TEXTBOOK.md)*
+*Lab manual: [README.md](README.md) · Exercises: [EXERCISES.md](EXERCISES.md) · Previous: [Prompt Injection & Guardrails](../prompt-injection-deep-dive/TEXTBOOK.md) · Next (bonus dives): [Agent Harnesses](../agent-harness-deep-dive/TEXTBOOK.md)*
