@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
 """
-serve.py — the capstone: run the support assistant as a real service.
-=====================================================================
+serve.py: the capstone: run the support assistant as a real service.
 
 Everything in the repo comes together here as one operable app. It exposes the
 full production pipeline (observability, cost, reliability, caching, guardrails,
 prompt versioning) two ways, and prints an ops summary on exit so you can see
 what the "fleet" did: total cost, cache hit rate, budget remaining.
 
-It runs offline on the mock provider by default — no key, no network.
+It runs offline on the mock provider by default: no key, no network.
 
 Examples
 --------
   # Ask one question and see the answer + its trace
   python hands_on/serve.py "How do I reset my password?"
 
-  # Interactive REPL — keep asking; the cache and budget persist across turns
+  # Interactive REPL: keep asking; the cache and budget persist across turns
   python hands_on/serve.py
 
   # Run an HTTP server and curl it (still offline on the mock provider)
@@ -28,7 +27,7 @@ Examples
   python hands_on/serve.py --trace "What plans do you offer?"
 
 Flip PROVIDER in .env (mock | openai | claude) to point the same service at a
-real model — nothing else changes.
+real model; nothing else changes.
 """
 
 import argparse
@@ -67,7 +66,7 @@ def answer_once(app: App, question: str, show_trace: bool) -> None:
 
 
 def run_repl(app: App, show_trace: bool) -> None:
-    print(f"Acme Cloud support assistant — provider={providers.describe()}")
+    print(f"Acme Cloud support assistant, provider={providers.describe()}")
     print("Ask a question (Ctrl-D or 'quit' to exit).\n")
     while True:
         try:
@@ -83,7 +82,7 @@ def run_repl(app: App, show_trace: bool) -> None:
 
 
 def run_server(app: App, port: int) -> None:
-    """A tiny stdlib HTTP server — no framework, same as the rest of the series."""
+    """A tiny stdlib HTTP server, no framework, same as the rest of the series."""
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
     class Handler(BaseHTTPRequestHandler):
