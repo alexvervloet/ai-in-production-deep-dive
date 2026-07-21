@@ -1,13 +1,12 @@
 """
-prod/cost.py — turn tokens into dollars, and stop before you overspend.
-=======================================================================
+prod/cost.py: turn tokens into dollars, and stop before you overspend.
 
 The OpenAI and Claude deep dives taught you to *estimate* cost: tokens times a
 price. In production that estimate has two new jobs:
 
-  1. **Attribution** — record what every request cost, tagged with its trace id,
+  1. **Attribution**: record what every request cost, tagged with its trace id,
      so you can answer "what did this customer / endpoint / day cost?"
-  2. **Enforcement** — a budget the app refuses to blow through. A runaway loop
+  2. **Enforcement**: a budget the app refuses to blow through. A runaway loop
      or an abuse spike should hit a ceiling and stop, not show up as a surprise
      invoice.
 
@@ -21,7 +20,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 # USD per 1M tokens, (input, output). Keep these in one place so a price change is
-# a one-line edit. (Illustrative — confirm current prices with your provider.)
+# a one-line edit. (Illustrative: confirm current prices with your provider.)
 _PRICES = {
     "mock-1": (0.15, 0.60),
     "gpt-4o-mini": (0.15, 0.60),

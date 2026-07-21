@@ -1,6 +1,5 @@
 """
-prod/prompts.py — treat the prompt as versioned code, not a magic string.
-=========================================================================
+prod/prompts.py: treat the prompt as versioned code, not a magic string.
 
 In every teaching repo the system prompt was a string literal next to the call.
 That's fine until the day someone "improves" it and quietly breaks a behavior

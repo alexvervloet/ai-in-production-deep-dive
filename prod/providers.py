@@ -1,11 +1,10 @@
 """
-prod/providers.py — the ONLY file that talks to a model provider.
-=================================================================
+prod/providers.py: the ONLY file that talks to a model provider.
 
 Same keystone idea as every sibling repo: hide the one provider-specific call
 behind a tiny function so the rest of the code is provider-agnostic. Here that
 matters even more, because the whole point of this repo is the *machinery around*
-the model call — observability, cost, retries, caching, guardrails, prompt
+the model call (observability, cost, retries, caching, guardrails, prompt
 versioning, eval gates. None of that machinery should care who serves the model.
 
 What's new here is a third stack: **`mock`**, the default.
@@ -18,7 +17,7 @@ What's new here is a third stack: **`mock`**, the default.
   PROVIDER=openai ->  OpenAI chat                 (needs OPENAI_API_KEY)
   PROVIDER=claude ->  Claude messages             (needs ANTHROPIC_API_KEY)
 
-Every layer in `prod/` calls `generate()` and gets back an `LLMResponse` — text
+Every layer in `prod/` calls `generate()` and gets back an `LLMResponse`: text
 plus the metadata production code actually needs: token counts, the model name,
 and how long the call took. Real providers fill those from the API response; the
 mock computes them locally so cost and latency dashboards work offline.
@@ -32,7 +31,7 @@ import time
 from dataclasses import dataclass
 from functools import lru_cache
 
-# Default models per stack. The mock's "model name" is cosmetic — it only shows
+# Default models per stack. The mock's "model name" is cosmetic: it only shows
 # up in logs and cost reports so they look like the real thing.
 _OPENAI_CHAT = "gpt-4o-mini"
 _CLAUDE_CHAT = "claude-haiku-4-5"
@@ -49,10 +48,10 @@ _KEYS = {
 class LLMResponse:
     """One model call's result, plus the metadata the ops layers need.
 
-    `text`       — the answer.
-    `model`      — which model produced it (for logs / cost attribution).
-    `prompt_tokens` / `completion_tokens` — for cost accounting (Section 3).
-    `latency_ms` — wall-clock time of the call (for observability, Section 1).
+    `text`       the answer.
+    `model`      which model produced it (for logs / cost attribution).
+    `prompt_tokens` / `completion_tokens` for cost accounting (Section 3).
+    `latency_ms` wall-clock time of the call (for observability, Section 1).
     """
 
     text: str
@@ -79,14 +78,14 @@ _warned_fallback = False
 
 
 def _warn_mock_fallback(p: str) -> None:
-    """Announce — loudly, but only once — that we degraded to the mock, and why."""
+    """Announce, loudly but only once, that we degraded to the mock, and why."""
     global _warned_fallback
     if _warned_fallback:
         return
     _warned_fallback = True
     missing = ", ".join(_KEYS.get(p, []))
     print(
-        f"\n⚠  PROVIDER={p} is set, but {missing} isn't on the environment — did you\n"
+        f"\n⚠  PROVIDER={p} is set, but {missing} isn't on the environment. Did you\n"
         f"   forget `secrun`? Falling back to the offline mock so this still runs.\n"
         f"   Real model:  secrun python <script>   |   Hard error instead:  PROVIDER_STRICT=1\n",
         file=sys.stderr,
@@ -97,8 +96,8 @@ def provider_name() -> str:
     """The active stack: 'mock' (default), 'openai', or 'claude'.
 
     If a real provider is selected but its key isn't on the environment (the
-    classic "forgot `secrun`"), degrade to the offline mock — loudly, and only
-    once — so a demo keeps running instead of dying on a missing key. This is the
+    classic "forgot `secrun`"), degrade to the offline mock, loudly and only
+    once, so a demo keeps running instead of dying on a missing key. This is the
     *opposite* of a silent fallback: a stderr banner and `describe()` both announce
     it, so you can never mistake a keyless mock run for a real one. Set
     PROVIDER_STRICT=1 to make the missing key a hard error instead (recommended for
@@ -130,7 +129,7 @@ def describe() -> str:
     if p == "mock" and configured != "mock":
         return (
             f"mock  (FALLBACK: PROVIDER={configured} is set but its key isn't on the "
-            f"environment — run under `secrun` for the real model)"
+            f"environment; run under `secrun` for the real model)"
         )
     if p == "mock":
         return f"mock  (offline, deterministic, model={_MOCK_MODEL}, no key)"
@@ -144,7 +143,7 @@ def describe() -> str:
 def ensure_ready() -> None:
     """Fail fast with a friendly message if the stack isn't configured.
 
-    For PROVIDER=mock this never fails — that's the point. For the real stacks it
+    For PROVIDER=mock this never fails; that's the point. For the real stacks it
     behaves exactly like the guard in the sibling repos.
     """
     import sys
@@ -165,7 +164,7 @@ def ensure_ready() -> None:
 
 
 # ---------------------------------------------------------------------------
-# The mock provider — a deterministic, offline "model"
+# The mock provider: a deterministic, offline "model"
 # ---------------------------------------------------------------------------
 #
 # It answers from a tiny support knowledge base for a fictional product, "Acme
@@ -201,10 +200,10 @@ _MOCK_KB = {
         "projects), and Team ($29/user/mo, with shared workspaces and SSO)."
     ),
     # Stands in for a model that, answering an account question, accidentally
-    # surfaces *another* customer's email — the classic leak (a retrieval mixup,
+    # surfaces *another* customer's email: the classic leak (a retrieval mixup,
     # stray context, PII memorized in training) an output guard exists to catch.
     # The address doesn't belong in the answer, so redacting it removes the leak
-    # without wrecking the rest — unlike the allowlisted support@acme.example,
+    # without wrecking the rest, unlike the allowlisted support@acme.example,
     # which the answer *wants* to surface and the guard must let through
     # (see the allowlist in prod/guardrails.py).
     "ticket status support request": (
@@ -245,7 +244,7 @@ def reset_mock_behavior() -> None:
 
 
 class TransientProviderError(RuntimeError):
-    """A retryable error — the kind real SDKs raise on a 429/503/timeout."""
+    """A retryable error, the kind real SDKs raise on a 429/503/timeout."""
 
 
 def _approx_tokens(text: str) -> int:
@@ -304,7 +303,7 @@ def _anthropic_client():
 def generate(system: str, user: str, max_tokens: int = 512) -> LLMResponse:
     """Turn a (system, user) prompt into an `LLMResponse`.
 
-    This is the single seam every ops layer wraps. Note it can *raise* — real
+    This is the single seam every ops layer wraps. Note it can *raise*: real
     APIs fail with rate limits and timeouts, and the reliability layer (Section 2)
     exists precisely to handle that. The mock can be told to fail on purpose via
     `set_mock_behavior(fail_next=...)`.

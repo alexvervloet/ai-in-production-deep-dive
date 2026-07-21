@@ -1,6 +1,5 @@
 """
-prod/app.py — the one app, with every layer wired in.
-=====================================================
+prod/app.py: the one app, with every layer wired in.
 
 This is the integration capstone of the whole series: a single function,
 `answer(question) -> Answer`, that takes one support question and runs it through
@@ -12,13 +11,13 @@ the full production stack, in order:
             └─ cache ──────────── return instantly on a repeat question
                └─ budget ───────── refuse if this call would bust the ceiling
                   └─ reliability ── retry transient failures; fall back if needed
-                     └─ MODEL CALL  (mock by default — offline, no key)
+                     └─ MODEL CALL  (mock by default: offline, no key)
                └─ cost ─────────── record what the call actually cost
          └─ guardrails (output) ── redact PII / catch a leaked prompt
 
 Every step writes into the request's trace, so one request produces one
 structured, searchable record of exactly what happened and what it cost. Nothing
-here is provider-specific — swap PROVIDER=mock for openai/claude and the same
+here is provider-specific. Swap PROVIDER=mock for openai/claude and the same
 pipeline runs against a real model.
 
 Each layer lives in its own small module (`prod/observability.py`, `cost.py`,
@@ -34,7 +33,7 @@ from prod import cost, guardrails, observability as obs, prompts, providers, rel
 from prod.cache import ResponseCache, cache_key
 
 SAFE_FALLBACK = (
-    "Sorry — I can't help with that right now. Please email support@acme.example."
+    "Sorry, I can't help with that right now. Please email support@acme.example."
 )
 
 

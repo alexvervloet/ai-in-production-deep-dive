@@ -1,6 +1,5 @@
 """
-prod/ — a from-scratch production stack for one LLM app.
-========================================================
+prod/ : a from-scratch production stack for one LLM app.
 
 Each module is one production concern, taught on its own in `examples/` and wired
 together in `app.py`:

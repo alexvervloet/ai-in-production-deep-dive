@@ -1,6 +1,5 @@
 """
-prod/observability.py — see what your app actually did.
-=======================================================
+prod/observability.py: see what your app actually did.
 
 In the teaching repos, "observability" was a `print()`. That's fine when you're
 the only user and the failure is on your screen. In production the request is
@@ -9,11 +8,11 @@ answer" is all you get. You need a record you can search.
 
 Three ideas, built from scratch with the standard library:
 
-  1. A **trace** — one object per request, carrying a unique id so every log line
+  1. A **trace**: one object per request, carrying a unique id so every log line
      and timing for that request can be stitched back together later.
-  2. **Spans** — timed sections within a request (guardrails, cache lookup, the
+  2. **Spans**: timed sections within a request (guardrails, cache lookup, the
      model call), so you can see *where the time went*.
-  3. **Structured logs** — one JSON object per event instead of prose, so you can
+  3. **Structured logs**: one JSON object per event instead of prose, so you can
      filter by trace_id, latency, or error in any log tool.
 
 This is a teaching-sized version of what OpenTelemetry + a backend (Honeycomb,

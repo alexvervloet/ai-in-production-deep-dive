@@ -1,11 +1,10 @@
 """
-prod/evals.py — the gate that decides whether a change ships.
-============================================================
+prod/evals.py: the gate that decides whether a change ships.
 
 The evals deep dive (repo #4) taught you to *measure* a change. This is where
 that measurement gets teeth: a **gate**. Before a new prompt version, model, or
 config goes live, it has to score above a threshold on a fixed gold dataset.
-Below the bar, the change does not ship — the same idea as a failing test
+Below the bar, the change does not ship, the same idea as a failing test
 blocking a merge.
 
 The dataset lives in `evals/gold.jsonl`: each row is a question plus the
@@ -14,7 +13,7 @@ is deliberately simple (substring checks) so it runs offline and deterministical
 against the mock; in a real system this is exactly where you'd plug in the
 LLM-as-judge scorer from the evals repo.
 
-`run_gate()` takes *any* answer function — `answer_fn(question) -> str` — so you
+`run_gate()` takes *any* answer function, `answer_fn(question) -> str`, so you
 can score the live app, or score a specific prompt version, without this file
 depending on the app.
 """

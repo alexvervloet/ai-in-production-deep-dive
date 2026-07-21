@@ -1,20 +1,19 @@
 """
-prod/cache.py — don't pay twice for the same answer.
-====================================================
+prod/cache.py: don't pay twice for the same answer.
 
 Model calls are the slow, expensive part of the app. If two users ask the same
-question — or one user retries — there's no reason to call the model again. A
+question, or one user retries, there's no reason to call the model again. A
 cache turns the second call into a microsecond dictionary lookup, cutting both
 latency and cost.
 
 The subtlety is the **key**. An answer is only reusable if *everything that
 shaped it* is the same: the user's question, the system prompt, AND the prompt
 version. Cache on the question alone and a prompt change silently keeps serving
-stale answers. So we hash all of it together — the same discipline the RAG repo
+stale answers. So we hash all of it together, the same discipline the RAG repo
 used for its index cache (the embedding model was part of the key).
 
 This is an exact-match cache with TTL. Production often adds a *semantic* cache
-(embed the query, reuse the answer for near-duplicates) — a natural extension
+(embed the query, reuse the answer for near-duplicates), a natural extension
 once you've done the embeddings repo.
 """
 
@@ -30,8 +29,8 @@ from prod.providers import LLMResponse
 def cache_key(system: str, user: str, *, prompt_version: str, model: str) -> str:
     """A stable key over everything that determines the answer.
 
-    Change any input — the question, the system prompt, the prompt version, or
-    the model — and you get a different key, so you never serve a stale answer
+    Change any input (the question, the system prompt, the prompt version, or
+    the model) and you get a different key, so you never serve a stale answer
     after a change.
     """
     payload = f"{model}\x1f{prompt_version}\x1f{system}\x1f{user}"
@@ -47,7 +46,7 @@ class _Entry:
 @dataclass
 class ResponseCache:
     """An in-process TTL cache. Real deployments back this with Redis so the
-    cache is shared across servers and survives a restart — but the interface is
+    cache is shared across servers and survives a restart, but the interface is
     the same: get / set on a key."""
 
     ttl_s: float = 3600.0

@@ -1,6 +1,5 @@
 """
-prod/reliability.py — survive a provider that fails, slows, or rate-limits.
-===========================================================================
+prod/reliability.py: survive a provider that fails, slows, or rate-limits.
 
 The teaching repos had a section on retries; here it becomes a layer the app
 always goes through. Real model APIs return 429s under load, 503s during
@@ -10,13 +9,13 @@ fast failure when not.
 
 Three classic patterns, from scratch:
 
-  1. **Retry with exponential backoff + jitter** — wait 0.5s, then 1s, then 2s
+  1. **Retry with exponential backoff + jitter**: wait 0.5s, then 1s, then 2s
      (each with a little randomness so a thousand clients don't retry in lockstep
      and hammer a recovering server). Only retry errors that are actually
      transient.
-  2. **Fallback** — if the primary path keeps failing, switch to a cheaper/older
+  2. **Fallback**: if the primary path keeps failing, switch to a cheaper/older
      model or a canned safe answer rather than showing the user an error.
-  3. **Circuit breaker** — after repeated failures, stop calling for a cooldown
+  3. **Circuit breaker**: after repeated failures, stop calling for a cooldown
      window. This protects a struggling provider from a retry storm and fails
      fast instead of making every user wait through the full backoff.
 
@@ -34,8 +33,8 @@ from prod.providers import TransientProviderError
 
 T = TypeVar("T")
 
-# Which exceptions are worth retrying. A 400 "bad request" is your bug — retrying
-# just wastes time. A 503 is the server's problem — retrying often works.
+# Which exceptions are worth retrying. A 400 "bad request" is your bug: retrying
+# just wastes time. A 503 is the server's problem: retrying often works.
 RETRYABLE = (TransientProviderError, TimeoutError, ConnectionError)
 
 
@@ -75,7 +74,7 @@ def with_fallback(primary: Callable[[], T], fallback: Callable[[], T]) -> T:
     """Try `primary`; on *any* error, fall back to `fallback`.
 
     Use this for the last line of defense: a cheaper model, a cached/stale answer,
-    or a safe canned message — anything better than a 500 to the user.
+    or a safe canned message: anything better than a 500 to the user.
     """
     try:
         return primary()
@@ -107,7 +106,7 @@ class CircuitBreaker:
 
     def call(self, fn: Callable[[], T]) -> T:
         if self.state == "open":
-            raise TransientProviderError("circuit open — failing fast (provider is unhealthy)")
+            raise TransientProviderError("circuit open, failing fast (provider is unhealthy)")
         try:
             result = fn()
         except Exception:

@@ -1,6 +1,5 @@
 """
-prod/guardrails.py — check what comes in and what goes out.
-===========================================================
+prod/guardrails.py: check what comes in and what goes out.
 
 The prompt-injection deep dive (repo #6) built these defenses in isolation, one
 demo per technique. Production's job is to put them *on the request path* so
@@ -8,15 +7,15 @@ every call is checked, in the right order, with the result recorded in the trace
 
 Two gates:
 
-  1. **Input guard** (before the model) — reject obvious prompt-injection
+  1. **Input guard** (before the model): reject obvious prompt-injection
      attempts and refuse to forward secrets/PII the user shouldn't be pasting.
      This is the "necessary, not sufficient" layer from the injection repo:
      cheap, catches the easy stuff, never your only defense.
-  2. **Output guard** (after the model) — catch a leaked system prompt, an empty
+  2. **Output guard** (after the model): catch a leaked system prompt, an empty
      answer, or PII in the response before it reaches the user.
 
 Each gate returns a `GuardResult` (allowed + reason) rather than raising, so the
-app can decide what to do — block, redact, or fall back to a safe message — and
+app can decide what to do (block, redact, or fall back to a safe message) and
 log the decision either way. The patterns here are intentionally simple; the
 point is *where* they sit, not regex cleverness.
 """
@@ -36,7 +35,7 @@ _INJECTION_PATTERNS = [
     r"developer mode",
 ]
 
-# A couple of common PII shapes. Not exhaustive — a real DLP layer does far more.
+# A couple of common PII shapes. Not exhaustive: a real DLP layer does far more.
 _PII_PATTERNS = {
     "credit_card": r"\b(?:\d[ -]?){13,16}\b",
     "ssn": r"\b\d{3}-\d{2}-\d{4}\b",
@@ -45,7 +44,7 @@ _PII_PATTERNS = {
 
 # Addresses the app is *supposed* to surface (its own support contact) must not be
 # redacted. A blunt PII filter that scrubs your own help desk email is worse than
-# useless — so every real redactor needs an allowlist of known-safe values.
+# useless: so every real redactor needs an allowlist of known-safe values.
 _ALLOWLIST = {"support@acme.example"}
 
 
@@ -83,7 +82,7 @@ def check_output(text: str, *, system_prompt: str = "") -> GuardResult:
         if marker and marker.lower() in text.lower():
             return GuardResult(allowed=False, reason="output appears to leak the system prompt")
 
-    # Redact PII rather than blocking — a useful answer with a masked email beats
+    # Redact PII rather than blocking: a useful answer with a masked email beats
     # no answer.
     redacted = text
     for label, pattern in _PII_PATTERNS.items():
