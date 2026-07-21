@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-00_mock_provider.py — the offline model that makes this whole repo runnable.
-============================================================================
+00_mock_provider.py: the offline model that makes this whole repo runnable.
 
     python examples/00_mock_provider.py            # offline, no key
 
@@ -13,12 +12,12 @@ demonstrate cost, retries, caching, and eval gates with no key and no network.
 
 Run it, then flip PROVIDER=openai or PROVIDER=claude in .env to point the exact
 same code at a real model. A real provider needs an API key, and the key lives in
-your OS keychain (not .env) — so you launch it through `secrun`, which injects the
+your OS keychain (not .env), so you launch it through `secrun`, which injects the
 key for that one command:
 
     secrun python examples/00_mock_provider.py     # PROVIDER=openai/claude
 
-Flip the provider but forget `secrun`, and the key won't be on the environment —
+Flip the provider but forget `secrun`, and the key won't be on the environment 
 so instead of crashing, the code degrades to the offline mock and says so, both in
 a stderr banner and in the "Active provider: mock (FALLBACK: ...)" line below. That
 keeps you running, but it is NOT the real model: use `secrun` for that, or set

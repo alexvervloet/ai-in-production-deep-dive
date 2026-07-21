@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-01_observability.py — one request, one searchable record.
-=========================================================
+01_observability.py: one request, one searchable record.
 
     python examples/01_observability.py            # offline, no key
 
@@ -11,7 +10,7 @@ Here we open a trace, time three spans inside it, and emit structured (JSON) log
 lines. Notice the trace_id threading every line together, and the per-span
 timings showing where the work went.
 
-Logs go to stderr; the "answer" goes to stdout — so in a real pipe your
+Logs go to stderr; the "answer" goes to stdout, so in a real pipe your
 telemetry never pollutes your output.
 """
 
@@ -41,4 +40,4 @@ import json
 # Re-open to show a summary object; in app.py this is logged automatically.
 print(json.dumps(trace.summary(), indent=2, default=str))
 print("\nIn production this goes to OpenTelemetry + a backend. The shape is the same:")
-print("trace id, spans, attributes — filter by any of them when something breaks.")
+print("trace id, spans, attributes: filter by any of them when something breaks.")

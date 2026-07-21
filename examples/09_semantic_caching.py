@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-09_semantic_caching.py — cache by MEANING, not exact text.
-==========================================================
+09_semantic_caching.py: cache by MEANING, not exact text.
 
     python examples/09_semantic_caching.py            # offline, no key
 
 The exact-match cache (Section 6) only hits when the question is byte-for-byte
 identical. But "how do I reset my password?" and "I forgot my password, help" want
-the *same* answer — and an exact cache misses every paraphrase. A **semantic cache**
+the *same* answer, and an exact cache misses every paraphrase. A **semantic cache**
 fixes that: embed the query, and serve a cached answer when a previous query is
 close enough in meaning (cosine similarity above a threshold).
 
@@ -41,7 +40,7 @@ load_dotenv()
 
 def embed(text: str) -> dict[str, float]:
     """A stand-in 'embedding': a bag-of-words vector. Real systems use a model;
-    the caching logic is identical — a vector and a cosine."""
+    the caching logic is identical: a vector and a cosine."""
     words = re.findall(r"[a-z']+", text.lower())
     vec: dict[str, float] = {}
     for w in words:
@@ -106,7 +105,7 @@ if __name__ == "__main__":
     print(f"\nCache: {cache.hits} hits / {cache.misses} misses "
           f"(hit rate {cache.hits / (cache.hits + cache.misses):.0%})")
     print(
-        "\nThe paraphrase HIT is the whole point — an exact cache would have missed it\n"
+        "\nThe paraphrase HIT is the whole point; an exact cache would have missed it\n"
         "and paid for another call. Tune the threshold carefully: too low and you serve\n"
         "a similar-but-wrong cached answer. Semantic caching trades a little risk for a\n"
         "much higher hit rate; keep exact-match for things that must never be confused."

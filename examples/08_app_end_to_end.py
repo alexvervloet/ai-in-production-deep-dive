@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-08_app_end_to_end.py — all seven layers, one request.
-=====================================================
+08_app_end_to_end.py: all seven layers, one request.
 
     python examples/08_app_end_to_end.py            # offline, no key
 
@@ -14,11 +13,11 @@ through `prod.app` and watch every layer act:
   - an answer with PII    -> redacted at the output guard
 
 The last one leans on the mock: answering an account question, it surfaces
-*another* customer's email — the kind of PII leak (a retrieval mixup, stray
+*another* customer's email: the kind of PII leak (a retrieval mixup, stray
 context) an output guard exists to catch. The guard scrubs the address to
 [redacted-email] without wrecking the rest of the answer; the point is that this
 email doesn't belong there, unlike the app's own support@acme.example, which the
-guard's allowlist lets through. A real model wouldn't leak on cue — which is the
+guard's allowlist lets through. A real model wouldn't leak on cue, which is the
 whole point of an output guard: a net for what you *can't* predict.
 
 The structured trace for each request is printed so you can see exactly what

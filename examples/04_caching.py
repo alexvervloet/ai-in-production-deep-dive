@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-04_caching.py — don't pay twice for the same answer.
-====================================================
+04_caching.py: don't pay twice for the same answer.
 
     python examples/04_caching.py            # offline, no key
 
@@ -48,4 +47,4 @@ ask("How do I reset my password?", SYSTEM_V2, "v2")   # prompt changed -> MISS (
 
 print(f"\nCache: {cache.hits} hits / {cache.misses} misses  (hit rate {cache.hit_rate:.0%})")
 print("\nThe key hashes question + system + prompt version + model. Anything that")
-print("changes the answer changes the key — so you never serve a stale answer.")
+print("changes the answer changes the key, so you never serve a stale answer.")

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-10_model_fallback.py — failover and cost routing across models.
-===============================================================
+10_model_fallback.py: failover and cost routing across models.
 
     python examples/10_model_fallback.py            # offline, no key
 
@@ -9,7 +8,7 @@ Reliability (Section 5) made *one* model call survive a blip with retries. This 
 the next layer: when a model is down (or too expensive for the job), use a
 *different* one. Two patterns:
 
-  FAILOVER. If the primary model errors even after retries, fall back to a backup —
+  FAILOVER. If the primary model errors even after retries, fall back to a backup 
   a second provider, a cheaper model, or a safe canned answer. Better a slightly
   worse answer than a 500.
 
@@ -52,7 +51,7 @@ def call(model_label: str, question: str):
 
 # --- 1. FAILOVER: the primary errors, fall back to a backup -------------------
 def demo_failover():
-    print("1) FAILOVER — primary model is down\n" + "-" * 40)
+    print("1) FAILOVER: primary model is down\n" + "-" * 40)
     # Force the next call to fail like a real outage would.
     providers.set_mock_behavior(fail_next=99)
 
@@ -79,7 +78,7 @@ def is_hard(question: str) -> bool:
 
 
 def demo_routing():
-    print("2) COST ROUTING — send each query to the right tier\n" + "-" * 40)
+    print("2) COST ROUTING: send each query to the right tier\n" + "-" * 40)
     questions = [
         "How do I reset my password?",
         "Can I get a refund?",
@@ -105,7 +104,7 @@ if __name__ == "__main__":
     demo_failover()
     demo_routing()
     print(
-        "Takeaway: a model is a dependency like any other — have a backup for when it's\n"
+        "Takeaway: a model is a dependency like any other. Have a backup for when it's\n"
         "down (failover) and don't pay top-tier prices for bottom-tier questions (cost\n"
         "routing). Both are a few lines around the same generate() call."
     )

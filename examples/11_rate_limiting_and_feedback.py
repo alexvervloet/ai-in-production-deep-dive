@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-11_rate_limiting_and_feedback.py — protect the service, then learn from it.
-===========================================================================
+11_rate_limiting_and_feedback.py: protect the service, then learn from it.
 
     python examples/11_rate_limiting_and_feedback.py            # offline, no key
 
@@ -16,7 +15,7 @@ the other learns from what happened on the way out.
 
   THE FEEDBACK FLYWHEEL. Production is the best source of eval data you'll ever have.
   Capture a 👍/👎 on answers, and your thumbs-down cases become a labelled set of
-  exactly the things your system gets wrong — feed them into the evals dive (#5) as
+  exactly the things your system gets wrong. Feed them into the evals dive (#5) as
   regression tests and as fine-tuning data. Real usage → better system → repeat.
 
 Both run fully offline.
@@ -66,7 +65,7 @@ class TokenBucket:
 
 
 class RateLimiter:
-    """One bucket per tenant — the heart of multi-tenant fairness."""
+    """One bucket per tenant: the heart of multi-tenant fairness."""
 
     def __init__(self, capacity=5, refill_per_sec=2.0):
         self.capacity, self.refill = capacity, refill_per_sec
@@ -92,19 +91,19 @@ class FeedbackLog:
 
 
 def demo_rate_limiting():
-    print("1) RATE LIMITING — one tenant's burst can't starve the others\n" + "-" * 40)
+    print("1) RATE LIMITING: one tenant's burst can't starve the others\n" + "-" * 40)
     limiter = RateLimiter(capacity=5, refill_per_sec=2.0)
     # Tenant A floods with 8 rapid requests; tenant B sends 2.
     print("  tenant A sends 8 requests in a burst (capacity 5):")
     allowed = sum(limiter.allow("tenant-A") for _ in range(8))
-    print(f"    {allowed} served, {8 - allowed} throttled (429) — the burst is capped.")
+    print(f"    {allowed} served, {8 - allowed} throttled (429); the burst is capped.")
     print("  tenant B sends 2 requests (its own bucket is full):")
     allowed_b = sum(limiter.allow("tenant-B") for _ in range(2))
-    print(f"    {allowed_b}/2 served — A's flood didn't affect B. That's fairness.\n")
+    print(f"    {allowed_b}/2 served; A's flood didn't affect B. That's fairness.\n")
 
 
 def demo_feedback():
-    print("2) FEEDBACK FLYWHEEL — turn production into eval data\n" + "-" * 40)
+    print("2) FEEDBACK FLYWHEEL: turn production into eval data\n" + "-" * 40)
     log = FeedbackLog()
     interactions = [
         ("How do I reset my password?", "up"),

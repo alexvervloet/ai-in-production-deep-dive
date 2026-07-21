@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-02_cost.py — turn tokens into dollars, and refuse to overspend.
-===============================================================
+02_cost.py: turn tokens into dollars, and refuse to overspend.
 
     python examples/02_cost.py            # offline, no key
 
 Two jobs the teaching repos didn't have: *attribute* every call's cost, and
 *enforce* a ceiling. We set a tiny budget, then keep asking questions until the
-next call would blow past it — and watch the budget refuse it instead of
+next call would blow past it, and watch the budget refuse it instead of
 spending. That refusal is the difference between a bounded bill and a surprise
 invoice from a runaway loop.
 """

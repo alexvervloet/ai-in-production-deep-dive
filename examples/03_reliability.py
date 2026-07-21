@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """
-03_reliability.py — make a flaky provider succeed anyway.
-=========================================================
+03_reliability.py: make a flaky provider succeed anyway.
 
     python examples/03_reliability.py            # offline, no key
 
 The mock can be told to fail on purpose, which gives the retry/backoff/fallback
 code something real to handle. Three demos:
 
-  1. Retry with backoff — fail twice, then succeed; watch the backoff grow.
-  2. Fallback — fail every time; serve a safe canned answer instead of erroring.
-  3. Circuit breaker — after enough failures, fail *fast* without even trying,
+  1. Retry with backoff: fail twice, then succeed; watch the backoff grow.
+  2. Fallback: fail every time; serve a safe canned answer instead of erroring.
+  3. Circuit breaker: after enough failures, fail *fast* without even trying,
      to protect a struggling provider from a retry storm.
 """
 
@@ -34,7 +33,7 @@ providers.set_mock_behavior(fail_next=2)
 resp = reliability.with_retry(
     lambda: providers.generate(SYSTEM, Q),
     base_delay=0.05,  # short so the demo is snappy
-    on_retry=lambda n, e, d: print(f"   retry #{n} after {d:.2f}s — {e}"),
+    on_retry=lambda n, e, d: print(f"   retry #{n} after {d:.2f}s: {e}"),
 )
 print(f"   -> succeeded: {resp.text[:48]}...\n")
 
@@ -42,7 +41,7 @@ print("2) Fallback (every attempt fails -> safe canned answer)")
 providers.set_mock_behavior(fail_next=99)
 result = reliability.with_fallback(
     lambda: reliability.with_retry(lambda: providers.generate(SYSTEM, Q), max_attempts=2, base_delay=0.02),
-    lambda: "Sorry — I can't reach the help center right now. Email support@acme.example.",
+    lambda: "Sorry, I can't reach the help center right now. Email support@acme.example.",
 )
 print(f"   -> {result}\n")
 
@@ -57,4 +56,4 @@ for i in range(1, 6):
 
 providers.reset_mock_behavior()
 print("\nThe breaker stops hammering a sick provider; the fallback keeps users")
-print("served. Together they turn provider outages into degraded — not broken — UX.")
+print("served. Together they turn provider outages into degraded, not broken, UX.")
