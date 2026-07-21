@@ -1,4 +1,4 @@
-# The default stack (PROVIDER=mock) needs only python-dotenv — everything else
+# The default stack (PROVIDER=mock) needs only python-dotenv: everything else
 # is the Python standard library. That's deliberate: the whole production stack
 # runs offline with no key and almost no dependencies.
 
@@ -9,8 +9,8 @@ python-dotenv>=1.0.0
 # You only need these if you switch PROVIDER away from the offline mock to point
 # the same pipeline at a real model. Install the one you want, or both.
 
-# OpenAI — used when PROVIDER=openai.
+# OpenAI: used when PROVIDER=openai.
 openai>=1.30.0
 
-# Anthropic — used when PROVIDER=claude.
+# Anthropic: used when PROVIDER=claude.
 anthropic>=0.111.0
