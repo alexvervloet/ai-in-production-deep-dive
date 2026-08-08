@@ -11,7 +11,7 @@ price. In production that estimate has two new jobs:
      invoice.
 
 Prices below are per *million* tokens, matching how providers publish them. The
-mock provider has no real cost, but we price it anyway (at the gpt-4o-mini rate)
+mock provider has no real cost, but we price it anyway (at the gpt-5.4-nano rate)
 so the budget machinery is demonstrable offline.
 """
 
@@ -22,8 +22,8 @@ from dataclasses import dataclass, field
 # USD per 1M tokens, (input, output). Keep these in one place so a price change is
 # a one-line edit. (Illustrative: confirm current prices with your provider.)
 _PRICES = {
-    "mock-1": (0.15, 0.60),
-    "gpt-4o-mini": (0.15, 0.60),
+    "mock-1": (0.20, 1.25),
+    "gpt-5.4-nano": (0.20, 1.25),
     "claude-haiku-4-5": (1.00, 5.00),
 }
 

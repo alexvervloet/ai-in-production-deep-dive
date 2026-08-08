@@ -33,7 +33,7 @@ from functools import lru_cache
 
 # Default models per stack. The mock's "model name" is cosmetic: it only shows
 # up in logs and cost reports so they look like the real thing.
-_OPENAI_CHAT = "gpt-4o-mini"
+_OPENAI_CHAT = "gpt-5.4-nano"
 _CLAUDE_CHAT = "claude-haiku-4-5"
 _MOCK_MODEL = "mock-1"
 
@@ -316,7 +316,7 @@ def generate(system: str, user: str, max_tokens: int = 512) -> LLMResponse:
     if p == "openai":
         resp = _openai_client().chat.completions.create(
             model=_OPENAI_CHAT,
-            max_tokens=max_tokens,
+            max_completion_tokens=max_tokens,
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},

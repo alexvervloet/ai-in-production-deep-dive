@@ -39,7 +39,7 @@ load_dotenv()
 
 # Two tiers with a real price gap (rates live in prod/cost.py): a cheap, fast model
 # and a pricier, stronger one. The labels just pick a row in the price table.
-CHEAP, STRONG = "gpt-4o-mini", "claude-haiku-4-5"
+CHEAP, STRONG = "gpt-5.4-nano", "claude-haiku-4-5"
 
 
 def call(model_label: str, question: str):
