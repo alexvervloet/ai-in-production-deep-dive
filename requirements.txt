@@ -10,7 +10,7 @@ python-dotenv>=1.0.0
 # the same pipeline at a real model. Install the one you want, or both.
 
 # OpenAI: used when PROVIDER=openai.
-openai>=1.30.0
+openai>=2.0,<3
 
 # Anthropic: used when PROVIDER=claude.
-anthropic>=0.111.0
+anthropic>=0.111.0,<1
