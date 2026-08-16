@@ -34,6 +34,7 @@ import argparse
 import json
 import os
 import sys
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -83,8 +84,6 @@ def run_repl(app: App, show_trace: bool) -> None:
 
 def run_server(app: App, port: int) -> None:
     """A tiny stdlib HTTP server, no framework, same as the rest of the series."""
-    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-
     class Handler(BaseHTTPRequestHandler):
         def _send(self, code: int, payload: dict) -> None:
             body = json.dumps(payload, default=str).encode("utf-8")
