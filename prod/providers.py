@@ -146,8 +146,6 @@ def ensure_ready() -> None:
     For PROVIDER=mock this never fails; that's the point. For the real stacks it
     behaves exactly like the guard in the sibling repos.
     """
-    import sys
-
     p = provider_name()
     if p not in _KEYS:
         sys.exit(
