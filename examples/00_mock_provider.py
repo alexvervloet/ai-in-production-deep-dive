@@ -22,7 +22,7 @@ so instead of crashing, the code degrades to the offline mock and says so, both 
 a stderr banner and in the "Active provider: mock (FALLBACK: ...)" line below. That
 keeps you running, but it is NOT the real model: use `secrun` for that, or set
 PROVIDER_STRICT=1 to turn the missing key back into a hard error. One-time keychain
-setup is in ../SECRETS.md.
+setup is in ../docs/SECRETS.md.
 """
 
 import os

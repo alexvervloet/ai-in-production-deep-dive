@@ -60,7 +60,7 @@ pip install -r requirements.txt
 # 3. Copy the env file: the default runs keyless (no API key needed)
 cp .env.example .env
 #    (Real provider instead of the mock? Its key goes in your OS keychain,
-#     not .env: see ../SECRETS.md, then run scripts as `secrun python ...`.)
+#     not .env: see ../docs/SECRETS.md, then run scripts as `secrun python ...`.)
 
 # 4. Confirm everything is wired up (makes no API call, costs nothing)
 python check_setup.py
@@ -284,7 +284,7 @@ guarded, cached, and served from a versioned prompt that passed the gate. Flip
 `PROVIDER` in `.env` and the same service runs against a real model; the only
 other thing that changes is the key: a real provider needs one, it lives in your
 keychain (not `.env`), so you launch through `secrun python ...` (see
-[SECRETS.md](../SECRETS.md)). The application code is untouched.
+[SECRETS.md](../docs/SECRETS.md)). The application code is untouched.
 
 ---
 
@@ -403,7 +403,7 @@ Run `python check_setup.py` first; it catches most problems. Then, by symptom:
 | What you see | What it means / the fix |
 |--------------|-------------------------|
 | `ModuleNotFoundError: dotenv` | Dependencies aren't installed or the venv isn't active. `source .venv/bin/activate` then `pip install -r requirements.txt`. |
-| `PROVIDER=... needs ... in the environment` | You switched to a real provider without a key. Load it from your keychain with `secrun` (see [SECRETS.md](../SECRETS.md)), or go back to `PROVIDER=mock`. |
+| `PROVIDER=... needs ... in the environment` | You switched to a real provider without a key. Load it from your keychain with `secrun` (see [SECRETS.md](../docs/SECRETS.md)), or go back to `PROVIDER=mock`. |
 | The eval gate exits non-zero | That's the gate working: a version failed. `python examples/07_eval_gate.py` shows which case and why. |
 | `BudgetExceeded` | The spend ceiling did its job. Raise it with `--budget` on the capstone, or `Budget(limit_usd=...)` in code. |
 | Structured logs clutter my output | Logs go to **stderr**, answers to **stdout**, so `python ... 2>/dev/null` hides logs. Or raise the level with `observability.set_level("error")`. |
