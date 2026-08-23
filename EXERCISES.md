@@ -200,7 +200,7 @@ protect against, and why is a thumbs-down the most valuable signal you can log?
 
 It stops any one client/tenant from **starving a shared, costly backend** (fairness,
 cost control, multi-tenancy), so one tenant's burst is capped without affecting others.
-A 👎 is a **labelled example of something your system got wrong**, exactly the
+A thumbs down is a labelled example of something your system got wrong, exactly the
 regression test (evals dive) and fine-tuning data that makes the next version better.
 </details>
 
