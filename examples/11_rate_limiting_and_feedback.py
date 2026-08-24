@@ -13,8 +13,8 @@ the other learns from what happened on the way out.
   tenant gets a steady refill and a small burst, and excess requests are throttled
   (a 429), not served.
 
-  THE FEEDBACK FLYWHEEL. Production is the best source of eval data you'll ever have.
-  Capture a 👍/👎 on answers, and your thumbs-down cases become a labelled set of
+  THE FEEDBACK LOOP. Production is the best source of eval data you'll ever have.
+  Capture a thumbs up or down on answers, and the thumbs-down cases become a set of
   exactly the things your system gets wrong. Feed them into the evals dive (#5) as
   regression tests and as fine-tuning data. Real usage → better system → repeat.
 
@@ -76,10 +76,10 @@ class RateLimiter:
         return b.allow()
 
 
-# --- 2. The feedback flywheel ------------------------------------------------
+# --- 2. The feedback loop ----------------------------------------------------
 @dataclass
 class FeedbackLog:
-    """Records (question, answer, 👍/👎). The 👎 rows are your next eval set."""
+    """Records (question, answer, up/down). The down rows are your next eval set."""
 
     rows: list[dict] = field(default_factory=list)
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     demo_feedback()
     print(
         "Takeaway: rate limiting protects a shared, costly backend from any one client\n"
-        "(fairness + cost control + multi-tenancy); the feedback flywheel turns real\n"
+        "(fairness + cost control + multi-tenancy); the feedback loop turns real\n"
         "usage into the labelled data that makes the system better over time. Bracket\n"
         "every request: guard the input, learn from the output."
     )
