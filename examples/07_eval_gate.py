@@ -8,7 +8,7 @@ This is where "measure it" (the evals repo) becomes "gate it." We score both
 prompt versions against the same gold set (evals/gold.jsonl) and let the gate
 decide which is allowed to ship. The gold set requires citations on at least one
 case; v1 doesn't cite its sources, so it fails the gate, while the constrained v2
-passes. In CI this exit code is what blocks a merge: a prompt that quietly drops
+passes. In CI this exit code is what blocks a merge: a prompt that drops
 a required behavior can't reach production.
 """
 
