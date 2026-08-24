@@ -2,7 +2,7 @@
 prod/prompts.py: treat the prompt as versioned code, not a magic string.
 
 In every teaching repo the system prompt was a string literal next to the call.
-That's fine until the day someone "improves" it and quietly breaks a behavior
+That's fine until the day someone "improves" it and breaks a behavior
 nobody re-tested. In production the prompt is one of your most important
 artifacts and it deserves the same discipline as code: versioned, diffable, and
 gated by evals before it ships.
