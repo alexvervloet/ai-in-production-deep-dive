@@ -44,7 +44,7 @@ _PII_PATTERNS = {
 
 # Addresses the app is *supposed* to surface (its own support contact) must not be
 # redacted. A blunt PII filter that scrubs your own help desk email is worse than
-# useless: so every real redactor needs an allowlist of known-safe values.
+# useless, so every real redactor needs an allowlist of known-safe values.
 _ALLOWLIST = {"support@acme.example"}
 
 
