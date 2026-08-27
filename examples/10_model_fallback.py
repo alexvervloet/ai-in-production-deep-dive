@@ -8,7 +8,7 @@ Reliability (Section 5) made *one* model call survive a blip with retries. This 
 the next layer: when a model is down (or too expensive for the job), use a
 *different* one. Two patterns:
 
-  FAILOVER. If the primary model errors even after retries, fall back to a backup 
+  FAILOVER. If the primary model errors even after retries, fall back to a backup:
   a second provider, a cheaper model, or a safe canned answer. Better a slightly
   worse answer than a 500.
 
