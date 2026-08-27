@@ -17,7 +17,7 @@ key for that one command:
 
     secrun python examples/00_mock_provider.py     # PROVIDER=openai/claude
 
-Flip the provider but forget `secrun`, and the key won't be on the environment 
+Flip the provider but forget `secrun`, and the key won't be on the environment,
 so instead of crashing, the code degrades to the offline mock and says so, both in
 a stderr banner and in the "Active provider: mock (FALLBACK: ...)" line below. That
 keeps you running, but it is NOT the real model: use `secrun` for that, or set
