@@ -3,7 +3,7 @@
 # runs offline with no key and almost no dependencies.
 
 # Loads variables from a .env file (like PROVIDER) into the environment.
-python-dotenv>=1.0.0
+python-dotenv>=1.0.0,<2
 
 # --- Provider SDKs (OPTIONAL) ---
 # You only need these if you switch PROVIDER away from the offline mock to point
