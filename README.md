@@ -244,6 +244,13 @@ v2 passes.
 python examples/07_eval_gate.py        # exits non-zero if nothing clears the bar
 ```
 
+A threshold on a fixed gold set is the right first gate and it has a limit worth knowing
+about. It compares one score against one number, so it cannot tell a real regression from
+a run that landed differently. [model-swap](https://github.com/alexvervloet/model-swap)
+gates the same kind of change on paired per-case outcomes and an interval instead, which
+turns "87% versus 89%" into ship, do not ship, or inconclusive with the number of extra
+cases that would settle it.
+
 ---
 
 ## 10. The capstone: `serve.py`
