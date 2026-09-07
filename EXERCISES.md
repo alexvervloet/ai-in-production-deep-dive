@@ -168,7 +168,7 @@ summary. That's one operable service, offline, no key.
 
 ---
 
-## Going further: three more production concerns **(offline)**
+## Going further: four more production concerns **(offline)**
 
 **Predict (semantic caching, `09`).** "How do I reset my password?" is cached. A new
 query "How can I reset my password if I forgot it?" arrives. Exact-match cache: hit or
@@ -202,6 +202,26 @@ It stops any one client/tenant from **starving a shared, costly backend** (fairn
 cost control, multi-tenancy), so one tenant's burst is capped without affecting others.
 A thumbs down is a labelled example of something your system got wrong, exactly the
 regression test (evals dive) and fine-tuning data that makes the next version better.
+</details>
+
+**Predict (unit economics, `12`).** Your workflow costs $0.024 a call and a person
+spends about a minute checking each result. Someone proposes a quarter of engineering
+work to cut the model bill by 90%. Roughly how much does that move the cost of a
+finished task, and what would you propose instead?
+
+<details><summary>▸ Answer</summary>
+
+Almost nothing, around **3%**. At $45/hour loaded, one minute of review is $0.75,
+which is twenty times the model call, so the model is a rounding error in the total
+and cutting it in ten still leaves the review. Halving review time moves the same
+number by about **48%**, and that is the work worth funding: better retrieval so
+there is less to correct, a confidence signal that routes only the uncertain cases to
+a human, or an interface that makes an edit take twenty seconds instead of sixty.
+
+The general lesson is about which numbers are visible. The model bill has a dashboard
+and an invoice, so it gets the attention. Review time has neither, so it gets assumed
+away, and it is usually the larger number. Run the example and check the assumptions
+at the top of the file against your own workflow before you trust the conclusion.
 </details>
 
 ---
