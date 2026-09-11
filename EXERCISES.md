@@ -1,6 +1,6 @@
 # Exercises: make the learning stick
 
-Reading code teaches you less than *predicting* what it will do and then checking.
+Reading code teaches you less than *predicting* what it'll do and then checking.
 This file turns each section of the [README](README.md) into a few quick
 active-recall prompts: a thing to predict, a thing to change, and a question to
 answer from memory.
@@ -214,13 +214,13 @@ finished task, and what would you propose instead?
 Almost nothing, around **3%**. At $45/hour loaded, one minute of review is $0.75,
 which is twenty times the model call, so the model is a rounding error in the total
 and cutting it in ten still leaves the review. Halving review time moves the same
-number by about **48%**, and that is the work worth funding: better retrieval so
-there is less to correct, a confidence signal that routes only the uncertain cases to
+number by about **48%**, and that's the work worth funding: better retrieval so
+there's less to correct, a confidence signal that routes only the uncertain cases to
 a human, or an interface that makes an edit take twenty seconds instead of sixty.
 
 The general lesson is about which numbers are visible. The model bill has a dashboard
 and an invoice, so it gets the attention. Review time has neither, so it gets assumed
-away, and it is usually the larger number. Run the example and check the assumptions
+away, and it's usually the larger number. Run the example and check the assumptions
 at the top of the file against your own workflow before you trust the conclusion.
 </details>
 
