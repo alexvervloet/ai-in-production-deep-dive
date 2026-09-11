@@ -7,7 +7,7 @@ Observability, cost control, reliability, caching, guardrails, prompt versioning
 gates. No framework, no platform, no SaaS dashboard. Just enough code to see how each one
 works.
 
-Here is the thing that makes this repo work. It runs completely offline on a mock
+Here's the thing that makes this repo work. It runs completely offline on a mock
 provider, with no API key. The subject is the machinery around the model, so we ship a
 tiny deterministic "model" in-process and wrap it in the real ops stack. Every example,
 the eval gate, and the capstone server run with zero keys and zero cost. Flip one env var
@@ -25,7 +25,7 @@ ends with a section called "From teaching code to production." This repo is that
 made runnable.
 
 Like its siblings, walk through it rather than reading it. Each section ends with
-something to run. Do the running. That is where the learning is. And
+something to run. Do the running. That's where the learning is. And
 [EXERCISES.md](EXERCISES.md) has a predict-then-run prompt for each section.
 
 ---
@@ -76,11 +76,11 @@ that answers from a built-in support knowledge base. Pick your stack with `PROVI
 | `claude` | Claude `claude-haiku-4-5` | `ANTHROPIC_API_KEY` | tiny |
 
 The production stack is identical on all three, and the only file that knows which one
-you picked is [prod/providers.py](prod/providers.py). That is the whole point.
-Observability, cost, retries, caching, guardrails, prompt versioning, and eval gates are
-not provider features. They are things you build around the call.
+you picked is [prod/providers.py](prod/providers.py). That's the whole point.
+Observability, cost, retries, caching, guardrails, prompt versioning, and eval gates aren't
+provider features. They're things you build around the call.
 
-> **Everything in this repo runs offline.** No key, no network, no cost, and that is what
+> **Everything in this repo runs offline.** No key, no network, no cost, and that's what
 > lets us demonstrate cost dashboards, retries, and eval gates with a model that fails,
 > and succeeds, exactly when we tell it to.
 
@@ -92,8 +92,8 @@ The thing we're operating is a support assistant for a fictional product, Acme C
 it a question and it answers from a small knowledge base. That's the prototype every
 sibling repo would call done.
 
-The mock provider in [prod/providers.py](prod/providers.py) makes it operable offline. It
-is deterministic. The same question always yields the same answer and the same token
+The mock provider in [prod/providers.py](prod/providers.py) makes it operable offline. It's
+deterministic. The same question always yields the same answer and the same token
 counts, which is exactly what lets us demonstrate caching, where the repeat is a hit,
 evals, which need a stable answer to grade, and cost, which needs token counts you can
 predict. It also reports latency and can be told to fail on purpose, so the reliability
@@ -120,7 +120,7 @@ slow" is all you get. You need a record you can search.
 library. A **trace**, one object per request with a unique id. **Spans**, timed sections
 for guardrails, cache, and the model call, so you can see where the time went. And
 **structured logs**, one JSON object per event, filterable by trace id, latency, or error.
-It is a teaching-sized OpenTelemetry: same shapes, no backend.
+It's a teaching-sized OpenTelemetry: same shapes, no backend.
 
 ```bash
 python examples/01_observability.py
@@ -217,7 +217,7 @@ request, backed by the capability limits and dual-LLM patterns taught there.
 
 ## 8. The prompt is code
 
-In every teaching repo the system prompt was a string literal next to the call. That is
+In every teaching repo the system prompt was a string literal next to the call. That's
 fine until someone "improves" it and breaks a behavior nobody re-tested. Here prompts live
 in [prompts/](prompts/), one file per version. [prod/prompts.py](prod/prompts.py) loads
 them, so a rollout is a config flip (`PROMPT_VERSION` in `.env`) and a rollback is a
@@ -245,10 +245,10 @@ python examples/07_eval_gate.py        # exits non-zero if nothing clears the ba
 ```
 
 A threshold on a fixed gold set is the right first gate and it has a limit worth knowing
-about. It compares one score against one number, so it cannot tell a real regression from
+about. It compares one score against one number, so it can't tell a real regression from
 a run that landed differently. [model-swap](https://github.com/alexvervloet/model-swap)
 gates the same kind of change on paired per-case outcomes and an interval instead, which
-turns "87% versus 89%" into ship, do not ship, or inconclusive with the number of extra
+turns "87% versus 89%" into ship, don't ship, or inconclusive with the number of extra
 cases that would settle it.
 
 ---
@@ -282,7 +282,7 @@ python hands_on/serve.py --server --port 8099
 #   curl -s localhost:8099/metrics
 ```
 
-It is a real production service, if a small one. Every request gets traced, costed,
+It's a real production service, if a small one. Every request gets traced, costed,
 guarded, cached, and served from a versioned prompt that passed the gate. Flip `PROVIDER`
 in `.env` and the same service runs against a real model. The only other thing that
 changes is the key. A real provider needs one, it lives in your keychain rather than
@@ -327,7 +327,7 @@ python examples/11_rate_limiting_and_feedback.py
 §4 prices a call. Nobody buys calls. Divide total spend by the tasks that actually
 finished, add the human time spent correcting the output at a loaded hourly rate, and
 compare that against whatever the workflow replaced. That number decides whether the
-system is worth running, and it usually says something the model bill cannot: on a
+system is worth running, and it usually says something the model bill can't: on a
 workflow with a person in the loop, a model ten times cheaper moves the total by 3%
 while halving review time moves it by 48%.
 ```bash
@@ -362,7 +362,7 @@ from-scratch layer for its industrial counterpart. The interfaces stay the same.
   [prod/providers.py](prod/providers.py) is the same join a `local` provider would use.
   Self-hosting an open-weight model with vLLM, Ollama, or llama.cpp trades the per-token
   bill and the data-leaves-your-VPC concern for ops you now own: GPU capacity, batching,
-  latency, uptime. Every layer in this repo applies unchanged. You have added a provider
+  latency, uptime. Every layer in this repo applies unchanged. You've added a provider
   whose reliability is your problem too.
 
 Every one of these sits on top of the idea you started with. The model call is one line,
@@ -467,4 +467,4 @@ And the whole series lands in one codebase in the
 [capstone](https://github.com/alexvervloet/deep-dive-capstone): a codebase Q&A tool
 built step by step, one tag per dive.
 
-**You are here: #8, Production.**
+**You're here: #8, Production.**
