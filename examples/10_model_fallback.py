@@ -106,5 +106,14 @@ if __name__ == "__main__":
     print(
         "Takeaway: a model is a dependency like any other. Have a backup for when it's\n"
         "down (failover) and don't pay top-tier prices for bottom-tier questions (cost\n"
-        "routing). Both are a few lines around the same generate() call."
+        "routing). Both are a few lines around the same generate() call.\n"
+        "\n"
+        "One thing to try BEFORE a cascade, though, because this example can't show it\n"
+        "offline. Current models take an effort setting per request (reasoning_effort on\n"
+        "OpenAI, output_config.effort on Claude), and turning it down on one model is\n"
+        "often cheaper than routing between two. It's also simpler: one model means one\n"
+        "prompt cache, and caches are model-scoped, so a cascade forfeits cache reuse\n"
+        "between its tiers. That cost doesn't appear in the arithmetic above and it can\n"
+        "eat the saving. Measure the same model at lower effort against your cascade\n"
+        "before you build the cascade."
     )

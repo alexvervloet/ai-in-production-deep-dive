@@ -313,6 +313,11 @@ fraction of the bill.
 ```bash
 python examples/10_model_fallback.py
 ```
+Try the effort dial before you build the cascade. Current models take a per-request
+effort setting, and the same model at lower effort often matches a cheaper model at
+full effort, without splitting your prompt cache in two. Caches are model-scoped, so
+a cascade gives up reuse between its tiers, and that cost is missing from every
+routing comparison that only counts per-token rates.
 
 ### Rate limiting and the feedback loop
 A per-tenant token bucket stops one client from starving a shared, costly backend, which
