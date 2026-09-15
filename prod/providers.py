@@ -52,6 +52,10 @@ class LLMResponse:
     `model`      which model produced it (for logs / cost attribution).
     `prompt_tokens` / `completion_tokens` for cost accounting (Section 3).
     `latency_ms` wall-clock time of the call (for observability, Section 1).
+    `stop_reason`  why generation stopped. "end_turn" is the normal case.
+                   "refusal" means a safety classifier declined the request:
+                   the HTTP call SUCCEEDED and `text` is empty (Section 13).
+    `stop_category` on a refusal, the provider's category for it, else None.
     """
 
     text: str
@@ -59,6 +63,13 @@ class LLMResponse:
     prompt_tokens: int
     completion_tokens: int
     latency_ms: float
+    stop_reason: str = "end_turn"
+    stop_category: str | None = None
+
+    @property
+    def refused(self) -> bool:
+        """True when the provider declined. Check this before reading `text`."""
+        return self.stop_reason == "refusal"
 
     @property
     def total_tokens(self) -> int:
@@ -222,22 +233,31 @@ _MOCK_FALLBACK = (
 # budget layers have something real to handle. Real providers ignore all of this.
 class _MockBehavior:
     fail_next: int = 0  # raise a transient error on the next N calls, then recover
+    refuse_next: int = 0  # return stop_reason="refusal" on the next N calls
     latency_ms: float = 5.0  # simulated round-trip time per call
 
 
 mock = _MockBehavior()
 
 
-def set_mock_behavior(*, fail_next: int | None = None, latency_ms: float | None = None) -> None:
+def set_mock_behavior(
+    *,
+    fail_next: int | None = None,
+    refuse_next: int | None = None,
+    latency_ms: float | None = None,
+) -> None:
     """Configure the mock provider for a demo (no effect on real providers)."""
     if fail_next is not None:
         mock.fail_next = fail_next
+    if refuse_next is not None:
+        mock.refuse_next = refuse_next
     if latency_ms is not None:
         mock.latency_ms = latency_ms
 
 
 def reset_mock_behavior() -> None:
     mock.fail_next = 0
+    mock.refuse_next = 0
     mock.latency_ms = 5.0
 
 
@@ -256,6 +276,21 @@ def _mock_generate(system: str, user: str) -> LLMResponse:
     if mock.fail_next > 0:
         mock.fail_next -= 1
         raise TransientProviderError("mock: simulated transient upstream error (503)")
+
+    # A refusal is NOT an exception. The request succeeded; the model declined.
+    # That asymmetry is the whole lesson of Section 13, so the mock reproduces it
+    # exactly: a normal return, empty text, and a stop_reason that says why.
+    if mock.refuse_next > 0:
+        mock.refuse_next -= 1
+        return LLMResponse(
+            text="",
+            model=_MOCK_MODEL,
+            prompt_tokens=_approx_tokens(system + user),
+            completion_tokens=0,
+            latency_ms=mock.latency_ms,
+            stop_reason="refusal",
+            stop_category="mock_policy",
+        )
 
     q = user.lower()
     best_key, best_score = None, 0
@@ -322,12 +357,19 @@ def generate(system: str, user: str, max_tokens: int = 512) -> LLMResponse:
         )
         latency_ms = (time.perf_counter() - start) * 1000
         usage = resp.usage
+        choice = resp.choices[0]
+        # OpenAI signals a content-policy stop through finish_reason; a refusal
+        # also arrives as message.refusal rather than message.content.
+        refusal = getattr(choice.message, "refusal", None)
+        stop_reason = "refusal" if refusal else "end_turn"
         return LLMResponse(
-            text=resp.choices[0].message.content or "",
+            text=choice.message.content or "",
             model=_OPENAI_CHAT,
             prompt_tokens=usage.prompt_tokens if usage else _approx_tokens(system + user),
             completion_tokens=usage.completion_tokens if usage else 0,
             latency_ms=latency_ms,
+            stop_reason=stop_reason,
+            stop_category=choice.finish_reason if refusal else None,
         )
     if p == "claude":
         resp = _anthropic_client().messages.create(
@@ -338,11 +380,17 @@ def generate(system: str, user: str, max_tokens: int = 512) -> LLMResponse:
         )
         latency_ms = (time.perf_counter() - start) * 1000
         text = "".join(b.text for b in resp.content if b.type == "text")
+        # Claude returns stop_reason="refusal" with HTTP 200 and stop_details
+        # carrying the category. stop_details is None for every other stop_reason,
+        # so guard before reading it.
+        details = getattr(resp, "stop_details", None)
         return LLMResponse(
             text=text,
             model=_CLAUDE_CHAT,
             prompt_tokens=resp.usage.input_tokens,
             completion_tokens=resp.usage.output_tokens,
             latency_ms=latency_ms,
+            stop_reason=resp.stop_reason or "end_turn",
+            stop_category=getattr(details, "category", None),
         )
     raise ValueError(f"Unknown PROVIDER={p!r} (expected 'mock', 'openai', or 'claude').")
