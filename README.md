@@ -291,9 +291,9 @@ changes is the key. A real provider needs one, it lives in your keychain rather 
 
 ---
 
-## Going further: four more production concerns
+## Going further: five more production concerns
 
-The capstone covers the core seven layers. These four are the next ones you hit at
+The capstone covers the core seven layers. These five are the next ones you hit at
 scale, and like everything here they run offline on the mock.
 
 ### Semantic caching
@@ -332,6 +332,21 @@ workflow with a person in the loop, a model ten times cheaper moves the total by
 while halving review time moves it by 48%.
 ```bash
 python examples/12_cost_per_successful_task.py
+```
+
+### The refusal, or the failure that returns 200
+Every failure in §5 announces itself by raising. A refusal doesn't. A safety
+classifier declines the request, the API returns 200, `stop_reason` says `refusal`,
+and the text is empty. Your `except` block never fires, your retry never triggers,
+your error rate never moves, and a user gets a blank reply. It's worse than an
+outage because an outage pages somebody.
+
+Treat it as a third outcome. Not an error, not an answer. The example shows the
+naive read, the cache quietly storing the empty string and serving it to everyone
+afterward, and the guard that fixes both: branch on the stop reason before anything
+touches the text.
+```bash
+python examples/13_refusal.py
 ```
 
 ---
@@ -406,6 +421,7 @@ examples/
   10_model_fallback.py      ← failover to a backup model + cost routing by difficulty
   11_rate_limiting_and_feedback.py ← per-tenant token bucket + the thumbs up/down feedback loop
   12_cost_per_successful_task.py   ← the unit economics: is the workflow worth running?
+  13_refusal.py                    ← the failure that returns 200 OK and an empty string
 ```
 
 ---

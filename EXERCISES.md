@@ -168,7 +168,7 @@ summary. That's one operable service, offline, no key.
 
 ---
 
-## Going further: four more production concerns **(offline)**
+## Going further: five more production concerns **(offline)**
 
 **Predict (semantic caching, `09`).** "How do I reset my password?" is cached. A new
 query "How can I reset my password if I forgot it?" arrives. Exact-match cache: hit or
@@ -222,6 +222,54 @@ The general lesson is about which numbers are visible. The model bill has a dash
 and an invoice, so it gets the attention. Review time has neither, so it gets assumed
 away, and it's usually the larger number. Run the example and check the assumptions
 at the top of the file against your own workflow before you trust the conclusion.
+</details>
+
+### Refusals (`13_refusal.py`)
+
+**Predict, then run.** A safety classifier declines one of your requests. Your code
+is wrapped in `try/except` and sits behind the retry layer from Section 5. Which of
+your defenses catches it: the `except`, the retry, the error-rate alert, or none?
+
+<details><summary>▸ Answer</summary>
+
+**None.** A refusal is not an exception. The HTTP call succeeds with a 200, the
+response carries `stop_reason: "refusal"`, and `text` is empty. There is nothing for
+`except` to catch, so the retry never fires and the error rate never moves. The
+request is counted as a success by every meter you have. That's what makes it worse
+than an outage: an outage is loud.
+</details>
+
+**Do.** Run `examples/13_refusal.py` and look at part 2. One refusal happened. How
+many users got an empty answer, and why?
+
+<details><summary>▸ Answer</summary>
+
+All of them, indefinitely. The naive path stores `resp.text` in the cache without
+asking why generation stopped, so the empty string becomes the cached answer for
+that question and every later request is served from it. The refusal was transient;
+the cache made it permanent.
+
+Two layers that each look correct alone combine into a bug, which is the general
+shape worth remembering. The cache's contract is "store what the model returned."
+The refusal's contract is "the model returned nothing, and told you why in a field
+you didn't read." Anything that persists or scores a model response, a cache, an
+eval harness, a golden-output file, needs to know what a refusal is.
+</details>
+
+**Recall.** Where should the refusal count go, and why isn't "log it and move on"
+enough?
+
+<details><summary>▸ Answer</summary>
+
+Next to successes and errors on the Section 1 dashboard, as its own counter. A
+refusal rate that moves means either a provider policy changed under you or one of
+your prompts started tripping a classifier, and those have completely different
+fixes. You can only tell them apart if you were counting before it moved.
+
+"Log it and move on" leaves the user with a blank reply. A refusal needs a decided
+outcome: a different model, a canned response, or a human. Anthropic's server-side
+fallbacks will route by refusal category if you opt in, which is a reasonable
+default precisely because it forces the decision to exist.
 </details>
 
 ---
