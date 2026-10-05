@@ -51,14 +51,15 @@ and confirm the `spans` dict tracks your change.
 
 ## Section 4: Cost
 
-**Predict, then run.** `examples/02_cost.py` sets a $0.0002 budget. Before running,
+**Predict, then run.** `examples/02_cost.py` sets a $0.00008 budget. Before running,
 guess how many of the five questions get answered before `BudgetExceeded`. Then
 run it.
 
 <details><summary>▸ Answer</summary>
 
-About five. Each mock call costs ~$0.00003, so the ceiling lands mid-list. The
-exact cutoff depends on token counts. The lesson isn't the number: it's that the
+Three. Each mock call costs about $0.000024 at the `gpt-6-luna` rate, so the fourth
+would take the total to about $0.000094 and the budget refuses it. The exact cutoff
+depends on token counts. The lesson isn't the number: it's that the
 budget *refuses the call* rather than spending past the limit. `check()` runs
 before the spend; `record()` after.
 </details>
