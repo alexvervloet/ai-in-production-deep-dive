@@ -72,7 +72,7 @@ that answers from a built-in support knowledge base. Pick your stack with `PROVI
 | `PROVIDER` | What runs the model | Keys needed | Cost |
 |------------|---------------------|-------------|------|
 | `mock` (default) | a deterministic offline "model" | **none** | **$0** |
-| `openai` | OpenAI `gpt-5.4-nano` | `OPENAI_API_KEY` | tiny |
+| `openai` | OpenAI `gpt-6-luna` | `OPENAI_API_KEY` | tiny |
 | `claude` | Claude `claude-haiku-4-5` | `ANTHROPIC_API_KEY` | tiny |
 
 The production stack is identical on all three, and the only file that knows which one
