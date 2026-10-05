@@ -33,7 +33,7 @@ from functools import lru_cache
 
 # Default models per stack. The mock's "model name" is cosmetic: it only shows
 # up in logs and cost reports so they look like the real thing.
-_OPENAI_CHAT = "gpt-5.4-nano"
+_OPENAI_CHAT = "gpt-6-luna"
 _CLAUDE_CHAT = "claude-haiku-4-5"
 _MOCK_MODEL = "mock-1"
 
@@ -349,6 +349,10 @@ def generate(system: str, user: str, max_tokens: int = 512) -> LLMResponse:
     if p == "openai":
         resp = _openai_client().chat.completions.create(
             model=_OPENAI_CHAT,
+            # gpt-6-luna reasons by default. Hidden reasoning tokens count against
+            # max_completion_tokens and add latency the dashboards would blame on
+            # the network. "none" keeps it a plain support-bot call.
+            reasoning_effort="none",
             max_completion_tokens=max_tokens,
             messages=[
                 {"role": "system", "content": system},
