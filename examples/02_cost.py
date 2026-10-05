@@ -23,7 +23,7 @@ from prod import cost, providers
 load_dotenv()
 
 SYSTEM = "You are the Acme Cloud support assistant. Always cite the source."
-budget = cost.Budget(limit_usd=0.0002)  # deliberately tiny so we hit it fast
+budget = cost.Budget(limit_usd=0.00008)  # deliberately tiny so we hit it fast
 
 questions = [
     "How do I reset my password?",
@@ -33,7 +33,7 @@ questions = [
     "What plans do you offer?",
 ]
 
-print(f"Budget: ${budget.limit_usd:.4f}   (provider: {providers.provider_name()})\n")
+print(f"Budget: ${budget.limit_usd:.6f}   (provider: {providers.provider_name()})\n")
 for q in questions:
     resp = providers.generate(SYSTEM, q)
     usd = cost.price_of(resp.model, resp.prompt_tokens, resp.completion_tokens)
@@ -44,7 +44,7 @@ for q in questions:
         print(f"         -> {exc}")
         break
     budget.record(resp.model, usd)
-    print(f"ok  ${usd:.6f}  (spent ${budget.spent_usd:.6f} / ${budget.limit_usd:.4f})  {q!r}")
+    print(f"ok  ${usd:.6f}  (spent ${budget.spent_usd:.6f} / ${budget.limit_usd:.6f})  {q!r}")
 
 print(f"\nTotal spent: ${budget.spent_usd:.6f} across {budget.calls} calls")
 print(f"By model: {budget.by_model}")
