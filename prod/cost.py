@@ -11,7 +11,7 @@ price. In production that estimate has two new jobs:
      invoice.
 
 Prices below are per *million* tokens, matching how providers publish them. The
-mock provider has no real cost, but we price it anyway (at the gpt-5.4-nano rate)
+mock provider has no real cost, but we price it anyway (at the gpt-6-luna rate)
 so the budget machinery is demonstrable offline.
 """
 
@@ -22,8 +22,9 @@ from dataclasses import dataclass, field
 # USD per 1M tokens, (input, output). Keep these in one place so a price change is
 # a one-line edit. (Illustrative: confirm current prices with your provider.)
 _PRICES = {
-    "mock-1": (0.20, 1.25),
-    "gpt-5.4-nano": (0.20, 1.25),
+    "mock-1": (0.10, 0.50),  # priced like the series default, gpt-6-luna
+    "gpt-6-luna": (0.10, 0.50),
+    "gpt-5.4-nano": (0.20, 1.25),  # previous default; deprecated, off 2027-04-01
     "claude-haiku-4-5": (1.00, 5.00),
 }
 
@@ -55,8 +56,8 @@ class Budget:
     def check(self, estimated_usd: float) -> None:
         if self.spent_usd + estimated_usd > self.limit_usd:
             raise BudgetExceeded(
-                f"budget ${self.limit_usd:.4f} would be exceeded "
-                f"(spent ${self.spent_usd:.4f}, this call ~${estimated_usd:.4f})"
+                f"budget ${self.limit_usd:.6f} would be exceeded "
+                f"(spent ${self.spent_usd:.6f}, this call ~${estimated_usd:.6f})"
             )
 
     def record(self, model: str, usd: float) -> None:
