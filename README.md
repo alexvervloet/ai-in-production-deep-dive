@@ -443,7 +443,7 @@ Run `python check_setup.py` first. It catches most problems. Then, by symptom:
 | `BudgetExceeded` | The spend ceiling did its job. Raise it with `--budget` on the capstone, or `Budget(limit_usd=...)` in code. |
 | Structured logs clutter my output | Logs go to **stderr**, answers to **stdout**, so `python ... 2>/dev/null` hides logs. Or raise the level with `observability.set_level("error")`. |
 | `circuit open, failing fast` | Expected after repeated failures (e.g. the reliability demo). The breaker reopens after its cooldown; `reset_mock_behavior()` clears injected faults. |
-| `SyntaxError` / odd type errors on startup | You're likely on Python 3.9 or older; this repo needs 3.10+. `check_setup.py` confirms your version. |
+| `SyntaxError` / odd type errors on startup | You're likely on Python 3.10 or older; this repo needs 3.11+. `check_setup.py` confirms your version. |
 
 Still stuck? Every file is small and self-contained. Open it, read the docstring
 at the top, and run it directly.
