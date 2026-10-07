@@ -12,7 +12,10 @@ Three classic patterns, from scratch:
   1. **Retry with exponential backoff + jitter**: wait 0.5s, then 1s, then 2s
      (each with a little randomness so a thousand clients don't retry in lockstep
      and hammer a recovering server). Only retry errors that are actually
-     transient.
+     transient, and when the server says how long to wait (`Retry-After`), wait
+     at least that long. A 429 for a spent credit balance isn't transient, even
+     though it shares the status code with a rate limit; providers.classify_error
+     tells them apart by the error code.
   2. **Fallback**: if the primary path keeps failing, switch to a cheaper/older
      model or a canned safe answer rather than showing the user an error.
   3. **Circuit breaker**: after repeated failures, stop calling for a cooldown
@@ -35,6 +38,8 @@ T = TypeVar("T")
 
 # Which exceptions are worth retrying. A 400 "bad request" is your bug: retrying
 # just wastes time. A 503 is the server's problem: retrying often works.
+# PermanentProviderError is deliberately absent: billing limits and bad requests
+# go straight to the caller on the first attempt.
 RETRYABLE = (TransientProviderError, TimeoutError, ConnectionError)
 
 
@@ -63,6 +68,11 @@ def with_retry(
             # Exponential backoff: base * 2^(attempt-1), plus up to 50% jitter.
             delay = base_delay * (2 ** (attempt - 1))
             delay += random.uniform(0, delay * 0.5)
+            # The server's own estimate beats ours. Retry-After is a floor: retrying
+            # sooner after a slow_down just earns another slow_down.
+            retry_after = getattr(exc, "retry_after", None)
+            if retry_after is not None:
+                delay = max(delay, retry_after)
             if on_retry:
                 on_retry(attempt, exc, delay)
             time.sleep(delay)
