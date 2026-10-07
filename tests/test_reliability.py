@@ -1,8 +1,9 @@
 """
 Retry decisions: what gets retried, how long it waits, and what gives up at once.
 
-Offline. The SDK exceptions are built by hand from httpx responses, so these test
-the same objects a real 429 or 529 produces, without a key or a network call.
+Offline. The SDK exceptions are the SDKs' own classes, built around a minimal stand-in
+response, so these test the same objects a real 429 or 529 produces, without a key
+or a network call.
 
 Run it:  python -m unittest discover -s tests
 """
@@ -14,8 +15,6 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import httpx  # noqa: E402
-
 from prod import providers, reliability  # noqa: E402
 from prod.providers import (  # noqa: E402
     PermanentProviderError,
@@ -24,9 +23,21 @@ from prod.providers import (  # noqa: E402
 )
 
 
+class _Response:
+    """What the SDK error constructors read from a response, and nothing else.
+
+    A stand-in rather than a real HTTP response, because openai 3.x and anthropic
+    1.x use httpx2 internally and a test shouldn't depend on which HTTP library
+    the SDK happens to ship with this month."""
+
+    def __init__(self, status, headers=None):
+        self.status_code = status
+        self.headers = {k.lower(): v for k, v in (headers or {}).items()}
+        self.request = None
+
+
 def _response(status, headers=None):
-    request = httpx.Request("POST", "https://api.example.test/v1/chat")
-    return httpx.Response(status, headers=headers or {}, request=request)
+    return _Response(status, headers)
 
 
 class TestClassify(unittest.TestCase):
