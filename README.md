@@ -166,7 +166,18 @@ patterns.
 - **Circuit breaker.** After repeated failures, stop calling for a cooldown so a retry
   storm can't bury a recovering provider.
 
-The mock fails on command, so you can watch all three work.
+Deciding *what* to retry matters as much as how. A 429 isn't one error. OpenAI's
+`slow_down` code means traffic ramped up too fast, and it can arrive even while you're
+under your rate limits. A 503 `server_is_overloaded` means the model is short of
+capacity. Both often carry a `Retry-After` header, and the retry layer waits at least
+that long. But `credit_balance_exhausted` and the spend-limit codes are 429s too, and
+waiting never fixes them, so `classify_error()` in
+[prod/providers.py](prod/providers.py) reads the error code and gives up on those after
+one attempt. The SDKs' own retries are switched off (`max_retries=0`), because a retry
+layer on top of an SDK that already retries twice turns one request into up to twelve,
+exactly when the provider is asking you to slow down.
+
+The mock fails on command, so you can watch all of it work, including the two 429s.
 
 ```bash
 python examples/03_reliability.py
