@@ -233,6 +233,10 @@ _MOCK_FALLBACK = (
 # budget layers have something real to handle. Real providers ignore all of this.
 class _MockBehavior:
     fail_next: int = 0  # raise a transient error on the next N calls, then recover
+    # Raise these specific provider errors, one per call, before anything else:
+    # (http_status, error_code, retry_after_seconds). Lets a demo show that a
+    # slow_down 429 and a credit_balance_exhausted 429 need different handling.
+    fail_with: list = []
     refuse_next: int = 0  # return stop_reason="refusal" on the next N calls
     latency_ms: float = 5.0  # simulated round-trip time per call
 
@@ -245,8 +249,11 @@ def set_mock_behavior(
     fail_next: int | None = None,
     refuse_next: int | None = None,
     latency_ms: float | None = None,
+    fail_with: list | None = None,
 ) -> None:
     """Configure the mock provider for a demo (no effect on real providers)."""
+    if fail_with is not None:
+        mock.fail_with = list(fail_with)
     if fail_next is not None:
         mock.fail_next = fail_next
     if refuse_next is not None:
@@ -256,13 +263,90 @@ def set_mock_behavior(
 
 
 def reset_mock_behavior() -> None:
+    mock.fail_with = []
     mock.fail_next = 0
     mock.refuse_next = 0
     mock.latency_ms = 5.0
 
 
 class TransientProviderError(RuntimeError):
-    """A retryable error, the kind real SDKs raise on a 429/503/timeout."""
+    """A retryable error: a rate limit, an overloaded server, a timeout.
+
+    `code` is the provider's error code when it sent one (OpenAI's `slow_down`,
+    `server_is_overloaded`), and `retry_after` is the server's own advice, in
+    seconds, from the `Retry-After` header. The retry layer waits at least that
+    long when it's there.
+    """
+
+    def __init__(self, message: str, *, code: str | None = None, retry_after: float | None = None):
+        super().__init__(message)
+        self.code = code
+        self.retry_after = retry_after
+
+
+class PermanentProviderError(RuntimeError):
+    """An error retrying can't fix: a bad request, bad auth, or a billing limit."""
+
+    def __init__(self, message: str, *, code: str | None = None):
+        super().__init__(message)
+        self.code = code
+
+
+# 429s that are about money, not speed. They share the rate-limit status code,
+# but no amount of waiting fixes them: a person has to add credits or raise a
+# limit. Retrying them just delays the error and spends rate-limit headroom.
+# (OpenAI's error codes as of 2026-10; check its error-codes guide for changes.)
+BILLING_CODES = frozenset({
+    "insufficient_quota",
+    "credit_balance_exhausted",
+    "organization_spend_limit_exceeded",
+    "project_spend_limit_exceeded",
+    "organization_usage_limit_exceeded",
+})
+
+
+def classify_error(
+    status: int | None, code: str | None, message: str, retry_after: float | None = None
+) -> Exception:
+    """Decide whether a failed call is worth retrying. Returns the error to raise.
+
+    Status alone isn't enough. A 429 can mean "slow down" (OpenAI's `slow_down`,
+    which can fire even under your rate limits if traffic ramps too fast) or
+    "you're out of money", and only the first one gets better with time.
+    """
+    if code in BILLING_CODES:
+        return PermanentProviderError(message, code=code)
+    if status is None or status in (408, 409, 429) or status >= 500:
+        # No status means the request never got an answer: a timeout or a dropped
+        # connection. Anthropic signals overload with 529, which >= 500 covers.
+        return TransientProviderError(message, code=code, retry_after=retry_after)
+    return PermanentProviderError(message, code=code)
+
+
+def _parse_retry_after(value: str | None) -> float | None:
+    """`Retry-After` in seconds. It can also be an HTTP date; we only use seconds."""
+    try:
+        return max(0.0, float(value)) if value is not None else None
+    except ValueError:
+        return None
+
+
+def _from_sdk_error(exc: Exception) -> Exception:
+    """Translate an OpenAI or Anthropic SDK exception into one of ours."""
+    status = getattr(exc, "status_code", None)
+    code = getattr(exc, "code", None)  # the OpenAI SDK lifts error.code onto the exception
+    body = getattr(exc, "body", None)
+    if code is None and isinstance(body, dict):
+        err = body.get("error") if isinstance(body.get("error"), dict) else body
+        code = err.get("code") or err.get("type")  # Anthropic puts it in error.type
+    response = getattr(exc, "response", None)
+    headers = getattr(response, "headers", None) or {}
+    retry_after = _parse_retry_after(headers.get("retry-after"))
+    return classify_error(status, code, str(exc), retry_after)
+
+
+def _is_sdk_error(exc: Exception) -> bool:
+    return type(exc).__module__.split(".")[0] in ("openai", "anthropic")
 
 
 def _approx_tokens(text: str) -> int:
@@ -273,6 +357,9 @@ def _approx_tokens(text: str) -> int:
 def _mock_generate(system: str, user: str) -> LLMResponse:
     # Simulate latency and (optionally) a transient failure.
     time.sleep(mock.latency_ms / 1000.0)
+    if mock.fail_with:
+        status, code, retry_after = mock.fail_with.pop(0)
+        raise classify_error(status, code, f"mock: HTTP {status} {code}", retry_after)
     if mock.fail_next > 0:
         mock.fail_next -= 1
         raise TransientProviderError("mock: simulated transient upstream error (503)")
@@ -319,28 +406,43 @@ def _mock_generate(system: str, user: str) -> LLMResponse:
 #     SDK import or a network call. ---
 
 
+# max_retries=0 on both: prod/reliability.py owns retrying. The SDKs retry twice
+# on their own by default, so leaving that on under a 4-attempt retry layer turns
+# one request into up to 12, exactly when the provider is asking you to back off.
 @lru_cache(maxsize=1)
 def _openai_client():
     from openai import OpenAI
 
-    return OpenAI()
+    return OpenAI(max_retries=0)
 
 
 @lru_cache(maxsize=1)
 def _anthropic_client():
     import anthropic
 
-    return anthropic.Anthropic()
+    return anthropic.Anthropic(max_retries=0)
 
 
 def generate(system: str, user: str, max_tokens: int = 512) -> LLMResponse:
     """Turn a (system, user) prompt into an `LLMResponse`.
 
-    This is the single seam every ops layer wraps. Note it can *raise*: real
-    APIs fail with rate limits and timeouts, and the reliability layer (Section 2)
-    exists precisely to handle that. The mock can be told to fail on purpose via
-    `set_mock_behavior(fail_next=...)`.
+    This is the single seam every ops layer wraps. It can *raise*: real APIs fail
+    with rate limits, overloads, and timeouts, and the reliability layer exists to
+    handle that. SDK exceptions come out as TransientProviderError (worth a retry)
+    or PermanentProviderError (not), so the retry layer decides on what failed,
+    not on which SDK raised it. The mock can fail on purpose via
+    `set_mock_behavior(fail_next=..., fail_with=...)`.
     """
+    try:
+        return _generate(system, user, max_tokens)
+    except Exception as exc:
+        if _is_sdk_error(exc):
+            raise _from_sdk_error(exc) from exc
+        raise
+
+
+def _generate(system: str, user: str, max_tokens: int = 512) -> LLMResponse:
+    """The provider calls themselves; generate() wraps them to classify errors."""
     p = provider_name()
     if p == "mock":
         return _mock_generate(system, user)
