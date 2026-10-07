@@ -89,6 +89,21 @@ often succeeds on retry. A 400 means the request itself is malformed; retrying i
 unchanged just wastes time and quota. Only retry what a retry could fix.
 </details>
 
+**Predict, then run.** Demo 4 in `examples/03_reliability.py` sends two 429s. One has
+the code `slow_down` and a `Retry-After` of 0.4 seconds; the other has the code
+`credit_balance_exhausted`. How many attempts does each get, and how long does the
+first one wait before retrying, given a 0.05-second base delay?
+
+<details><summary>▸ Answer</summary>
+
+The `slow_down` waits 0.4 seconds, not 0.05: `Retry-After` is a floor on the backoff,
+because retrying sooner just earns another `slow_down`. Then it succeeds on attempt 2.
+The `credit_balance_exhausted` gets exactly one attempt. It's a 429 too, but it's about
+money rather than speed, so `classify_error()` makes it a `PermanentProviderError` and
+the retry layer passes it straight up. The status code alone would have retried it four
+times and still failed.
+</details>
+
 ---
 
 ## Section 6: Caching
